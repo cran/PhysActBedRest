@@ -3,7 +3,7 @@
 \alias{zPhysActBedRest}
 \title{Physical Activity Bed Rest Data}
 \description{
-This is the aforementioned csv's loaded as Rdata
+This is the aforementioned csv loaded as Rdata
 }
 %\usage{}
 \format{matrices}

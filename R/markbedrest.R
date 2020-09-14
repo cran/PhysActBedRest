@@ -1,90 +1,66 @@
-
-markbedrest =  function(dset, age, loc, TS, cts, rstdr, rstfl, per, TH, wd, nvm, nmin, nmax, EC)
-{
+markbedrest =  function(dset, TS, cts, age, loc, rstdr, rstfl, per, TH, wd, nvm, nmin, nmax, EC){
 #  library("lubridate")
 #  library("chron")
   vector.is.empty <- function(x) return(length(x) ==0 )
   
-  
     if(!missing(age))
-    {
-    if(age=="Adult" | age=="ADULT" | age=="ad" | age=="AD"){
-      age="adult"}
-    }
-    if(!missing(age))
-    {
-      if(age=="Youth" | age=="YOUTH" | age=="yo" | age=="YO"){
-        age="youth"}
-    }
-    if(!missing(age))
-    {
-      if(age=="Preschool" | age=="PreSchool" |age=="PRESCHOOL" | age=="ps" | age=="PS" 
-         | age=="Preschooler" | age=="PreSchooler" |age=="PRESCHOOLER"){
-        age="preschool"}
-    }
+      {
+      if(age=="Adult" | age=="ADULT" | age=="ad" | age=="AD"){age="adult"}
+      if(age=="Youth" | age=="YOUTH" | age=="yo" | age=="YO"){age="youth"}
+      if(age=="Preschool" | age=="PreSchool" |age=="PRESCHOOL" | age=="ps" | age=="PS" | age=="Preschooler" | age=="PreSchooler" |age=="PRESCHOOLER"){age="preschool"}
+      }
     
     if(!missing(loc))
-    {
-      if(loc=="Wrist" | loc=="WRIST" | loc=="wr" | loc=="WR" | loc=="Wr"){
-        loc="wrist"}
-    }
-    if(!missing(loc))
-    {
-      if(loc=="Waist" | loc=="WAIST" | loc=="wa" | loc=="WA" | loc=="Wa"){
-        loc="waist"}
-    }
+      {
+        if(loc=="Wrist" | loc=="WRIST" | loc=="wr" | loc=="WR" | loc=="Wr"){loc="wrist"}
+        if(loc=="Waist" | loc=="WAIST" | loc=="wa" | loc=="WA" | loc=="Wa"){loc="waist"}
+      }
     
-    if(missing(TS))  {TS ="TS"}  
+    if(missing(TS)){TS ="TS"}  
     ts = dset[,TS]
 
-    
 # ERRORS that prevent it from running  
 
-  if(missing(dset)){
-    stop("You must specify the dset")}
+  if(missing(dset)) {stop("You must specify the dset")}
 
 # arg approach
-  else if(missing(age) & missing(loc) & missing(TH)) {stop("Unless specifying age and loc, you must specify a TH")}
-  else if(missing(age) & missing(loc) & missing(wd)) {stop("Unless specifying age and loc, you must specify a wd")}
-  else if(missing(age) & missing(loc) & missing(nvm)) {stop("Unless specifying age and loc, you must specify a nvm")}
+  if(missing(age) & missing(loc) & missing(TH)) {stop("Unless specifying age and loc, you must specify a TH")}
+  if(missing(age) & missing(loc) & missing(wd)) {stop("Unless specifying age and loc, you must specify a wd")}
+  if(missing(age) & missing(loc) & missing(nvm)) {stop("Unless specifying age and loc, you must specify a nvm")}
 
 # age loc approach
-  else if(!missing(age) & missing(loc)){
-    stop("If you specify age, you must specify loc, where the monitor was worn")}
-  else if(!missing(loc) & missing(age)){
-    stop("If you specify loc, you must specify age (of wearer)")}
-  
-
-
-########################################
-  else{
+  if(!missing(age) & missing(loc)) {stop("If you specify age, you must specify loc, where the monitor was worn")}
+  if(!missing(loc) & missing(age)) {stop("If you specify loc, you must specify age (of wearer)")}
+    
+  if(!missing(age)) {
+      if(!(age=="adult" | age=="youth" | age=="preschool")){
+        stop(paste0(paste0("'", age, "'"), ' is not a valid entry for age.  Only "preschool", "youth" and "adult" are valid entries')) 
+      }
+  }
+    
+#  if{
     if(missing(EC)) {EC=TRUE}  
     if(EC==TRUE){
-        if(!missing(age)) {
-          if(!(age=="adult" | age=="youth" | age=="preschool")){
-            stop(paste0(paste0("'", age, "'"), ' is not a valid entry for age.  Only "preschool", "youth" and "adult" are valid entries'))
-            }
-#          if(age=="preschool" & !(as.POSIXct(dset$TS[2]) == as.POSIXct(dset$TS[1]) + dseconds(15))){
-          if(age=="preschool" & !(dset$TS[2] == dset$TS[1] + dseconds(15))){
-              stop('preschool data must be in 15 second epochs')
-            }
-#          if(age!="preschool" & !(as.POSIXct(dset$TS[2]) == as.POSIXct(dset$TS[1]) + dseconds(60))){
-          if(age!="preschool" & !(dset$TS[2] == dset$TS[1] + dseconds(60))){
-            stop('non-preschool data must be in 60 second epochs')
+          if(!(dset$TS[2] == dset$TS[1] + lubridate::dseconds(60))){
+            stop('data must be in 60 second epochs')
             }
           }
-          
-        if(!missing(age) & !missing(loc)){
-          if(age=="preschool" & loc=="wrist"){
-          stop("Sorry, we don't have validated cut-offs for that age loc combination")
-          }
-        
-          if(!(loc=="waist" | loc=="wrist")){
-          stop(paste0(paste0("'", loc, "'"), ' is not a valid entry for loc.  Only "waist" and "wrist" are valid entries'))
-          }
+#        }
+
+    if(!missing(age) & !missing(loc)){
+      if(age=="preschool" & loc=="wrist"){
+        stop("Sorry, we don't have validated cut-offs for that age loc combination") 
+        }
+      if(!(loc=="waist" | loc=="wrist")){
+        stop(paste0(paste0("'", loc, "'"), ' is not a valid entry for loc.  Only "waist" and "wrist" are valid entries'))
         }
     }
     
+    if(missing(cts) & missing(age)){
+      stop("You must specify cts if you don't specify age")
+    }
+
+########################################
 # WARNINGS, but it can still run
 
     if(!(missing(age) & missing(loc))){ 
@@ -102,58 +78,67 @@ markbedrest =  function(dset, age, loc, TS, cts, rstdr, rstfl, per, TH, wd, nvm,
 
 #####################################
     
-    if(missing(TS))  {TS ="TS"}
-    if(missing(cts)) {cts = "Axis1"}
+    if(!missing(cts) & !missing(age)){
+      if(age=="preschool" & !(cts=="VM" | cts=="vm" | cts=="Vm")){
+        print(paste0("WARNING! the Preschool arguments were validated for VM.  Are you sure you want to use '", cts, "'?"))
+      }
+      if(age!="preschool" & !(cts=="Axis1" | cts=="axis1" | cts=="Axis 1" | cts=="axis 1")){
+        print(paste0("WARNING! the ", age, " arguments were validated for Axis1.  Are you sure you want to use '", 
+                     cts, "'?"))
+      }
+    }
     
-    if(missing(rstdr))  {rstdr = getwd()}
-    if(missing(rstfl)) {rstfl = "subj_slp_sum"}
+    if(missing(TS)){TS ="TS"}
+    if(missing(cts)){
+      if(!missing(age)){cts = ifelse(age=="preschool", "VM", "Axis1")}
+    }
+    if(missing(rstdr)){rstdr = getwd()}
+    if(missing(rstfl)){rstfl = "subj_slp_sum"}
     
-#    if(missing(TH))   {TH = 250}
-#    if(missing(wd))   {wd = 3000}
+#    if(missing(TH)){TH = 250}
+#    if(missing(wd)){wd = 3000}
     
-    if(missing(nmin)) {nmin = 60}
-    if(missing(nmax)) {nmax = 60}
-#    if(missing(nvm))  {nvm = 50}
-    if(missing(per))  {per  = 60}
+    if(missing(nmin)){nmin = 60}
+    if(missing(nmax)){nmax = 60}
+#    if(missing(nvm)){nvm = 50}
+    if(missing(per)){per  = 60}
 
 if(!missing(age)){
-      if(missing(nmin)) {if (age=="preschool") {nmin = 240} }
-      if(missing(nmax)) {if (age=="preschool") {nmax = 240} }
-      if(missing(per))  {if (age=="preschool") {per  = 240} }
+#      if(missing(nmin)) {if (age=="preschool") {nmin = 240} }
+#      if(missing(nmax)) {if (age=="preschool") {nmax = 240} }
+      if(missing(per))  {if (age=="preschool") {per  = 36} }
       }
 
 ###################################    
-    if(!missing(age) & !missing(loc))
-      {
+    if(!missing(age) & !missing(loc)){
       if(age=="preschool" & loc=="waist"){
-        TH=30
-        wd=50
-        nvm=10
+        TH=230
+        wd=1129
+        nvm=305
         #_60
         }
-        
-        if(age=="youth" & loc=="waist"){
-          TH=20
-          wd=500
-          nvm=50
-          }
-        if(age=="youth" & loc=="wrist"){
-          TH=250
-          wd=3000
-          nvm=50
+      if(age=="youth" & loc=="waist"){
+        TH=20
+        wd=500
+        nvm=50
         }
-        if(age=="adult" & loc=="waist"){
-          TH=10
-          wd=1000
-          nvm=140
-        }
-        if(age=="adult" & loc=="wrist"){
-          TH=400
-          wd=1500
-          nvm=150
-          per=30
-        }
+      if(age=="youth" & loc=="wrist"){
+        TH=250
+        wd=3000
+        nvm=50
       }
+      if(age=="adult" & loc=="waist"){
+        TH=10
+        wd=1000
+        nvm=140
+      }
+      if(age=="adult" & loc=="wrist"){
+        TH=400
+        wd=1500
+        nvm=150
+        per=30
+      }
+    }
     # set length of window to be searched for waking (minutes) #
     lagwin = 2*per
     # set length of window to be searched for sleep (minutes) #
@@ -231,7 +216,7 @@ if(!missing(age)){
       }
       
       if(slp == 1) {
-        if(h_avg[m-1] < TH & h_avg[m] > TH )
+        if(h_avg[m-1] < TH & h_avg[m] >= TH )
         {  i = (m * per)
            begwin = i - lagwin +1
            if(begwin<1) {begwin=1}
@@ -243,7 +228,7 @@ if(!missing(age)){
            while(k < lw)
              
            {if(winvm[k-1] > wd & winvm[k] > wd)
-           {wake = begwin + k - 1
+           {wake = begwin + k
             if(wake-lstchng < nmin)
             {
               sleep = replace(sleep, lstchng:wake, "a")
@@ -329,6 +314,6 @@ if(!missing(age)){
     write.csv(subj_slp_sum, result, row.names = FALSE)  
     
     return = dset_slp
-  } #end of else (not missing)
+#  } #end of else (not missing)
   
 } #end of function markbedrest
